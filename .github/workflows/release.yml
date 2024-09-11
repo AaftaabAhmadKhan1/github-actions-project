@@ -1,0 +1,49 @@
+name: Create Release
+
+# Trigger the workflow when the PR is merged to the main branch
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  create-release:
+    if: github.event.pull_request.merged == true  # Run only if PR is merged
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Zip the repository
+    - name: Zip source code
+      run: zip -r my-project.zip .
+
+    # Get the current date and time as a tag name
+    - name: Get tag name
+      id: tag_name
+      run: echo "::set-output name=tag::$(date +'%Y%m%d-%H%M%S')"
+
+    # Create a GitHub release
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Access the repository
+      with:
+        tag_name: ${{ steps.tag_name.outputs.tag }}
+        release_name: "Release ${{ steps.tag_name.outputs.tag }}"
+        body: "Release created automatically by GitHub Actions"
+        draft: false
+        prerelease: false
+
+    # Upload the zip file to the release
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./my-project.zip
+        asset_name: my-project.zip
+        asset_content_type: application/zip
