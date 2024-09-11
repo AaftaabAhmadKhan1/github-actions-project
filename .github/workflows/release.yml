@@ -22,7 +22,7 @@ jobs:
     # Get the current date and time as a tag name using environment files
     - name: Get tag name
       id: tag_name
-      run: echo "tag=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+      run: echo "tag=$(date +'%Y/%m/%d')" >> $GITHUB_ENV
 
     # Create a GitHub release
     - name: Create GitHub Release
